@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projektabschluss – Interaktiv</title>
+    <style>
+        :root {
+            --font-family-display: Arial, sans-serif;
+            --font-weight-display: 600;
+            --font-family-content: Arial, sans-serif;
+            --font-weight-content: 400;
+        }
+
+        body.theme-dark {
+            --color-bg-base: #0f172a;
+            --color-bg-elevated: #020617;
+            --color-bg-surface: #1e293b;
+            --color-text-primary: #f1f5f9;
+            --color-text-secondary: #cbd5e1;
+            --color-text-muted: #94a3b8;
+            --color-text-accent: #38bdf8;
+            --color-primary: #38bdf8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-family-content);
+            background-color: #0a0e27;
+            color: #f1f5f9;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 24px;
+            background-color: #38bdf8;
+            color: #0f172a;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #06b6d4;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(56, 189, 248, 0.3);
+        }
+
+        button:disabled {
+            background-color: #64748b;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .slide {
+            width: 960px;
+            height: 540px;
+            margin: 0 auto 30px;
+            display: none;
+            flex-direction: column;
+            justify-content: flex-start;
+            padding: 4rem;
+            background-color: #0f172a;
+            border-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .slide.active {
+            display: flex;
+        }
+
+        .slide-counter {
+            text-align: center;
+            font-size: 18px;
+            color: #94a3b8;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            font-size: 2.25rem;
+            color: #38bdf8;
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+        }
+
+        .slide-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+        }
+
+        .slide p {
+            font-size: 1.125rem;
+            color: #cbd5e1;
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+
+        ul {
+            margin-left: 2rem;
+            color: #cbd5e1;
+            font-size: 1.125rem;
+        }
+
+        li {
+            margin-bottom: 0.75rem;
+            line-height: 1.6;
+        }
+
+        .interactive-section {
+            background-color: #1e293b;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            border-left: 4px solid #38bdf8;
+        }
+
+        .interactive-btn {
+            background-color: #38bdf8;
+            padding: 10px 16px;
+            border-radius: 6px;
+            color: #0f172a;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            margin: 5px 5px 5px 0;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .interactive-btn:hover {
+            background-color: #06b6d4;
+            transform: scale(1.05);
+        }
+
+        .answer {
+            display: none;
+            background-color: #0f172a;
+            padding: 1rem;
+            border-radius: 6px;
+            margin-top: 1rem;
+            border: 1px solid #38bdf8;
+            color: #cbd5e1;
+            font-size: 0.95rem;
+        }
+
+        .answer.show {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .nav-btn {
+            padding: 10px 20px;
+            background-color: #38bdf8;
+            color: #0f172a;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover:not(:disabled) {
+            background-color: #06b6d4;
+        }
+
+        .nav-btn:disabled {
+            background-color: #64748b;
+            cursor: not-allowed;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background-color: #334155;
+            border-radius: 2px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: #38bdf8;
+            transition: width 0.3s ease;
+        }
+
+        .title-slide {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .title-slide h1 {
+            font-size: 3.75rem;
+            color: #38bdf8;
+            margin-bottom: 1rem;
+        }
+
+        .title-slide p {
+            font-size: 1.5rem;
+            color: #cbd5e1;
+            margin-bottom: 2rem;
+        }
+
+        .title-slide .subtitle {
+            font-size: 0.875rem;
+            color: #94a3b8;
+            margin-top: 1rem;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin: 0;
+        }
+    </style>
+</head>
+<body class="theme-dark">
+    <div class="container">
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+
+        <div class="controls">
+            <button onclick="toggleFullscreen()">🖥️ Vollbild</button>
+            <button onclick="resetPresentation()">🔄 Zurücksetzen</button>
+        </div>
+
+        <div class="slide-counter">
+            Folie <span id="currentSlide">1</span> / <span id="totalSlides">7</span>
+        </div>
+
+        <!-- Slide 1: Title -->
+        <section class="slide active title-slide" style="background-color: #020617;">
+            <div>
+                <h1>Projektabschluss</h1>
+                <p>Die finale Phase des Projektmanagements</p>
+                <p class="subtitle">Professionelle Abwicklung • Lessons Learned • Erfolgssicherung</p>
+            </div>
+        </section>
+
+        <!-- Slide 2: Hauptaktivitäten -->
+        <section class="slide" style="background-color: #0f172a;">
+            <h2>Hauptaktivitäten der Projektleitung</h2>
+            <div class="slide-content">
+                <p>Das Projektteam präsentiert die Ergebnisse dem Auftraggeber und bringt diese zur Abnahme. Im Abschlussmeeting wird reflektiert, was gut lief und wo Verbesserungen möglich sind. Die Projektdokumentation wird finalisiert und das Team aufgelöst. Gleichzeitig entstehen durch erfolgreiche Projekte neue Geschäftsmöglichkeiten.</p>
+                <div class="interactive-section">
+                    <strong>📌 Wichtigste Aktivität?</strong>
+                    <div style="margin-top: 0.75rem;">
+                        <button class="interactive-btn" onclick="toggleAnswer('answer1')">Abnahme des Ergebnisses</button>
+                        <button class="interactive-btn" onclick="toggleAnswer('answer1')">Lessons Learned</button>
+                        <button class="interactive-btn" onclick="toggleAnswer('answer1')">Dokumentation</button>
+                    </div>
+                    <div class="answer" id="answer1">
+                        ✅ Alle drei essentiell:<br>
+                        • Abnahme = Erfolgsbestätigung<br>
+                        • Lessons Learned = Lernkultur<br>
+                        • Dokumentation = Wissenssicherung
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 3: Aufgaben des Projektleiters -->
+        <section class="slide" style="background-color: #0f172a;">
+            <h2>Aufgaben des Projektleiters</h2>
+            <div class="slide-content">
+                <p>Der Projektleiter trägt die Gesamtverantwortung für einen erfolgreichen Abschluss. Seine Leistung wird an drei zentralen Erfolgskriterien gemessen:</p>
+                <ul>
+                    <li>Wurden die Projektziele erreicht?</li>
+                    <li>Hielten sich Ressourcen, Termine und Kosten im Plan?</li>
+                    <li>Erfüllt das Ergebnis die geforderte Qualität?</li>
+                </ul>
+                <div class="interactive-section">
+                    <strong>❓ Welches Kriterium ist am kritischsten?</strong>
+                    <div style="margin-top: 0.75rem;">
+                        <button class="interactive-btn" onclick="toggleAnswer('answer2')">Ziele erreicht</button>
+                        <button class="interactive-btn" onclick="toggleAnswer('answer2')">Budget/Zeit</button>
+                        <button class="interactive-btn" onclick="toggleAnswer('answer2')">Qualität</button>
+                    </div>
+                    <div class="answer" id="answer2">
+                        💡 Alle gleichwichtig, aber:<br>
+                        • Qualität = längerfristige Zufriedenheit<br>
+                        • Budget/Zeit = Effizienz<br>
+                        • Ziele = Projekterfolg
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 4: Abschluss-/Projektbericht -->
+        <section class="slide" style="background-color: #0f172a;">
+            <h2>Der Abschluss- oder Projektbericht</h2>
+            <div class="slide-content">
+                <ul>
+                    <li><strong style="color: #38bdf8;">Projektdefinition:</strong> Ziele, Ausgangssituation und kritische Erfolgsfaktoren</li>
+                    <li><strong style="color: #38bdf8;">Projektplanung:</strong> Struktur-, Netz- und Terminpläne mit Meilensteinen</li>
+                    <li><strong style="color: #38bdf8;">Projektdurchführung:</strong> Soll-Ist-Vergleich und tatsächlicher Verlauf</li>
+                    <li><strong style="color: #38bdf8;">Projektabschluss:</strong> Lessons Learned und Feedback</li>
+                </ul>
+                <div class="interactive-section">
+                    <strong>🎯 Klick auf ein Element, um mehr zu erfahren:</strong>
+                    <div style="margin-top: 0.75rem;">
+                        <button class="interactive-btn" onclick="toggleAnswer('answer3a')">Projektdefinition</button>
+                        <button class="interactive-btn" onclick="toggleAnswer('answer3b')">Projektplanung</button>
+                        <button class="interactive-btn" onclick="toggleAnswer('answer3c')">Projektdurchführung</button>
+                    </div>
+                    <div class="answer" id="answer3a">
+                        📋 Was & Warum:<br>
+                        • Ausgangssituation<br>
+                        • Ziele<br>
+                        • Erfolgsfaktoren
+                    </div>
+                    <div class="answer" id="answer3b">
+                        📊 Wie & Wann:<br>
+                        • Struktur/Netz-/Terminpläne<br>
+                        • Meilensteine<br>
+                        • Kritischer Pfad
+                    </div>
+                    <div class="answer" id="answer3c">
+                        📈 Plan vs. Realität:<br>
+                        • Soll-Ist-Vergleich<br>
+                        • Abweichungen<br>
+                        • Tatsächlicher Verlauf
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 5: Das Abschlussmeeting -->
+        <section class="slide" style="background-color: #0f172a;">
+            <h2>Das Abschlussmeeting</h2>
+            <div class="slide-content">
+                <p>Das Abschlussmeeting markiert das offizielle Ende des Projekts. Gemeinsam mit Auftraggeber und Team wird reflektiert:</p>
+                <ul>
+                    <li>Wurden alle Ziele und Rahmenbedingungen erfüllt?</li>
+                    <li>Gelten die ursprünglichen Prämissen noch?</li>
+                    <li>Entstehen neue Anforderungen? Welche Dokumentation wird benötigt?</li>
+                </ul>
+                <div class="interactive-section">
+                    <strong>💬 Was ist die Kernfrage im Abschlussmeeting?</strong>
+                    <div style="margin-top: 0.75rem;">
+                        <button class="interactive-btn" onclick="toggleAnswer('answer4')">Erfolg messen & Feedback sammeln</button>
+                    </div>
+                    <div class="answer" id="answer4">
+                        ✅ Kernpunkte:<br>
+                        • Erfolg messen<br>
+                        • Feedback sammeln<br>
+                        • Akzeptanz sichern
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 6: Lessons Learned -->
+        <section class="slide" style="background-color: #0f172a;">
+            <h2>Aus Projekten lernen – Lessons Learned</h2>
+            <div class="slide-content">
+                <p>Die abschließende Reflexion ist wertvoll für alle Beteiligten:</p>
+                <ul>
+                    <li>Wo lagen unsere Stärken? Wo hätten wir stärker sein können?</li>
+                    <li>Wie haben sich Einzelne im Team gefühlt und wie wurden sie wahrgenommen?</li>
+                    <li>Welche Erkenntnisse nehmen wir in das nächste Projekt mit?</li>
+                </ul>
+                <div class="interactive-section">
+                    <strong>🧠 Warum sind Lessons Learned so wichtig?</strong>
+                    <div style="margin-top: 0.75rem;">
+                        <button class="interactive-btn" onclick="toggleAnswer('answer5')">Wissen teilen</button>
+                        <button class="interactive-btn" onclick="toggleAnswer('answer5')">Fehler vermeiden</button>
+                        <button class="interactive-btn" onclick="toggleAnswer('answer5')">Kultur schaffen</button>
+                    </div>
+                    <div class="answer" id="answer5">
+                        🎓 Schlüsselbegriffe:<br>
+                        • Wissen teilen<br>
+                        • Fehler vermeiden<br>
+                        • Lernkultur aufbauen
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 7: Abschluss -->
+        <section class="slide title-slide" style="background-color: #020617;">
+            <div>
+                <h2 style="font-size: 2.5rem;">Erfolgreicher Projektabschluss</h2>
+                <p>Wissen teilen • Kontinuierlich verbessern • Neue Projekte gewinnen</p>
+                <p class="subtitle">Danke für eure Aufmerksamkeit!</p>
+            </div>
+        </section>
+
+        <div class="navigation">
+            <button class="nav-btn" id="prevBtn" onclick="previousSlide()">← Zurück</button>
+            <button class="nav-btn" id="nextBtn" onclick="nextSlide()">Weiter →</button>
+        </div>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+
+        function showSlide(n) {
+            slides.forEach(slide => slide.classList.remove('active'));
+            slides[n].classList.add('active');
+            
+            document.getElementById('currentSlide').textContent = n + 1;
+            document.getElementById('prevBtn').disabled = n === 0;
+            document.getElementById('nextBtn').disabled = n === totalSlides - 1;
+            
+            const progress = ((n + 1) / totalSlides) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+
+            // Close all answers when sliding
+            document.querySelectorAll('.answer').forEach(answer => answer.classList.remove('show'));
+
+            // Keyboard navigation
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowRight') nextSlide();
+                if (e.key === 'ArrowLeft') previousSlide();
+            });
+        }
+
+        function nextSlide() {
+            if (currentSlide < totalSlides - 1) {
+                currentSlide++;
+                showSlide(currentSlide);
+            }
+        }
+
+        function previousSlide() {
+            if (currentSlide > 0) {
+                currentSlide--;
+                showSlide(currentSlide);
+            }
+        }
+
+        function toggleAnswer(answerId) {
+            const answer = document.getElementById(answerId);
+            answer.classList.toggle('show');
+        }
+
+        function resetPresentation() {
+            currentSlide = 0;
+            showSlide(0);
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
+        // Initialize
+        showSlide(0);
+        document.getElementById('totalSlides').textContent = totalSlides;
+    </script>
+</body>
+</html>
